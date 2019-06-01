@@ -1,5 +1,5 @@
 # Guacomater
-##Automate the creation of Guacamole AD objects
+## Automate the creation of Guacamole AD objects
 
 Guacamole (the HTML5 remote desktop gateway) has the ability to use Microsoft's Active Directory as the store for where connection objects are held, instead of in a MariaDB instance. As AD is already my store for other types of objects, namely computers, users and groups, I preferred using it to store guacamole objects. It also opened up unique management opportunities
 
