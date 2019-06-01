@@ -89,14 +89,14 @@ Param
 )
 
 $ADOUTable = @{
-    "Servers" = "OU=Devices,OU=Org,DC=nativemode,DC=com";
-    "Workstations" = "OU=Computers,OU=Enterprise Management,DC=nativemode,DC=com";
-    "DC"="OU=Domain Controllers,DC=nativemode,DC=com"
+    "Servers" = "OU=Devices,OU=Org,DC=contoso,DC=com";
+    "Workstations" = "OU=Computers,OU=Enterprise Management,DC=contoso,DC=com";
+    "DC" = "OU=Domain Controllers,DC=contoso,DC=com"
 }
 
 $GuacUserTable = @{
-    "Servers" = "GroupDN1";
-    "Workstations" = "GroupDN2"
+    "Servers" = "CN=ServerAdmins,OU=Groups,OU=Org,DC=contoso,DC=com";
+    "Workstations" = "CN=WorkstationAdmins,OU=Groups,OU=Org,DC=contoso,DC=com"
 }
 
 #Function for creating new guacConfig objects.
@@ -111,7 +111,7 @@ Function New-GuacObject($CreateObject)
 
         Write-Verbose "Object DN: $CreateObjectDN"
         
-        $MemberVal = ("CN=Tim,OU=Users,OU=Org,DC=nativemode,DC=com")
+        $MemberVal = ("CN=Tim,OU=Users,OU=Org,DC=contoso,DC=com")
 
         $ConfigTable = @{
             "guacConfigProtocol"="rdp";
@@ -164,15 +164,17 @@ Function Remove-GuacObject($RemoveObject)
 Function Get-ADObjects
 {
     Write-Verbose "In Get-ADObjects function..."
-    $ADOUTable.GetEnumerator() | Foreach-Object {
-    Foreach ($OU in $ADObjectsOU)
+    $ADOUTable.GetEnumerator() | Foreach-Object 
     {
-        Write-Verbose "Getting ADObjects from $($_.Value)..."
-        $Script:ADObjects += Get-ADComputer -Filter * -SearchBase $_.Value -Properties *
-    }
+        Foreach ($OU in $ADObjectsOU)
+        {
+            Write-Verbose "Getting ADObjects from $($_.Value)..."
+            $Script:ADObjects += Get-ADComputer -Filter * -SearchBase $_.Value -Properties *
+        }
     Write-Verbose "AD Objects: $($ADObjects.Name)"
 
     Write-Verbose "Get-ADObjects function work complete."
+    }
 }
 
 #Function for getting all current guacamole configuration objects
@@ -189,7 +191,7 @@ Function Get-GuacObjects
     Else
     {
         Write-Verbose "Cleanany set to false. Will only operate on script created objects."
-        $Script:GuacObjects = Get-ADObject -LDAPFilter "(objectClass=guacConfigGroup)" -SearchBase $GuacObjectsOU -Properties * | Where {$_.Description -notlike "Created by Guac Config script"}
+        $Script:GuacObjects = Get-ADObject -LDAPFilter "(objectClass=guacConfigGroup)" -SearchBase $GuacObjectsOU -Properties * | Where-Object {$_.Description -notlike "Created by Guac Config script"}
         Write-Verbose "Guac Objects: $($GuacObjects.Name)"  
     }
   
@@ -231,7 +233,7 @@ If ($ADObjects -like "*")
         # Guac objects, no corresponding AD object
         $Script:MissingAD = Compare-Object -ReferenceObject $ADObjects -DifferenceObject $GuacObjects -Property Name | Where-Object {$_.SideIndicator -eq '=>'}
 
-        Write-Verbose "No rebuild. Will delte: $($MissingAD.Name)"
+        Write-Verbose "No rebuild. Will delete: $($MissingAD.Name)"
         Write-Verbose "No rebuild. Will create: $($MissingGuac.Name)"
 
     }
