@@ -5,6 +5,8 @@ Guacamole (the HTML5 remote desktop gateway) has the ability to use Microsoft's 
 
 With this in mind, I wanted a way to automatically have any new computers I add to AD be populated in the Guacamole console. This way I didn't need to have a seperate process for ensuring new servers get added properly to Guacamole to be able to remotely connect to them.
 
+Some more info can be found here: https://tsull360.wordpress.com/2019/11/23/automating-guacamole-object-creation-2/
+
 ## Guacomater was born
 
 Guacomater is a PowerShell script I created that runs periodically on a server on my network. It scans designated OU's for computer objects and compares it against currently defined Guacamole objects. Once this comparison is done, the Guacamole objects are created or deleted as required.
