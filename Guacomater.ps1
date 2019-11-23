@@ -10,16 +10,13 @@
     For more info on Guacamole: https://guacamole.apache.org/
 
 .PARAMETER GuacObjectsOU
-    Location where the script will create new Guac objects at and manage existing ones.
+    DN Location where the script will create new Guac objects at and manage existing ones.
 
-.PARAMETER WorkstationGroup
-    AD security group used for permissions Guac objects sourced from a Workstattions OU
-
-.PARAMETER ServerGroup
-    AD security group used for permissionsing Guac objects sourced for the servers OU
+.PARAMETER ConnectionGroup
+    DN of Security group of members allowed to connect to Guac objects
 
 .PARAMETER Domain
-    AD domain scrip is operating in
+    AD domain script is operating in
 
 .PARAMETER Rebuild
     Instructs script to ignore existing state and recreate all objects
@@ -58,10 +55,7 @@ Param
     [String]$GuacObjectsOU,
     
     [Parameter(Mandatory=$false)]
-    [String]$WorkStationGroup,
-    
-    [Parameter(Mandatory=$false)]
-    [String]$ServerGroup,
+    [String]$ConnectionGroup,
 
     [Parameter(Mandatory=$false)]
     [String]$Domain,
@@ -95,11 +89,6 @@ $ADOUTable = @{
     "DC" = "OU=Domain Controllers,DC=contoso,DC=com"
 }
 
-$GuacUserTable = @{
-    "Servers" = "CN=ServerAdmins,OU=Groups,OU=Org,DC=contoso,DC=com";
-    "Workstations" = "CN=WorkstationAdmins,OU=Groups,OU=Org,DC=contoso,DC=com"
-}
-
 #Function for creating new guacConfig objects.
 Function New-GuacObject($CreateObject)
 {
@@ -111,12 +100,10 @@ Function New-GuacObject($CreateObject)
         $CreateObjectDN = $CreateObject.DistinguishedName
 
         Write-Verbose "Object DN: $CreateObjectDN"
-        
-        $MemberVal = ("CN=Tim,OU=Users,OU=Org,DC=contoso,DC=com")
-
+    
         $ConfigTable = @{
             "guacConfigProtocol"="rdp";
-            "member"="$MemberVal"
+            "member"="$ConnectionGroup"
             "pHostname"="hostname=$CreateObject.$Domain";
             "pUsername"="username=`${GUAC_USERNAME}";
             "pPassword"="password=`${GUAC_PASSWORD}";
@@ -134,7 +121,7 @@ Function New-GuacObject($CreateObject)
                                                                                                            $($ConfigTable.Get_Item("pCert")), `
                                                                                                            $($ConfigTable.Get_Item("pSecurity")), `
                                                                                                            $($ConfigTable.Get_Item("pClient")); `
-                                                                                                           member="$MemberVal"; `
+                                                                                                           member="$ConnectionGroup"; `
                                                                                                            description=$($ConfigTable.Get_Item("Description"))}
         Write-Verbose "Object Created!"
     }
