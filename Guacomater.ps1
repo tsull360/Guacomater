@@ -25,7 +25,8 @@
     Instructs script to ignore existing state and recreate all objects
 
 .PARAMETER CleanAny
-    Instructs script to reconcile any objects whether created by the script or not.
+    The script tags any objects it creates (vs manual ones). This switch
+    instructs script to reconcile any objects whether created by the script or not.
 
 .PARAMETER EVLog
     Boolean switch for writing to the event log.
